@@ -73,3 +73,58 @@
 
 - J-CSIP
   - 重要インフラを集めて相互に情報共有したり。IPAのとりくみ
+
+## 1.6 ~ 1.7
+
+1.7 不正アクセス
+
+- システムを利用するものがその与えられた権限によって許された以上の行為をネットワークを介して意図的に行うことを不正アクセスと呼ぶ
+  - 刑法では十分に抑止・罰することができなかったので不正アクセス禁止法ができた
+  - ネットワークを通じてのアクセス　がポイント
+- 不正アクセスの方法
+  - ネットワークスキャン
+    - 考えられるあらゆるIPアドレスにpingを実施
+    - pingに応答しないステルスモードでコンピューターを稼働させる
+
+```
+# AWSなら素直にセキュリティグループでポートを閉じていればOK
+# linux機器でfirewalldを使っているなら単純にこのコマンドでOK
+firewall-cmd --set-target=DROP --permanent
+```
+
+- ポートスキャン
+  - 実は種類がある
+  - TCPスキャン
+    - 3ハンドシェイクを行う。検出が比較的用意。
+  - SYNスキャン
+    - 3ハンドシェイクのうち、SYNだけを送信
+    - ハーフオープンスキャンと呼ばれる
+  - FINスキャン
+    - TCPの通信終了要求であるFINを送信する
+    - ポートが閉じていたらRSTが返信されて状態がわかる
+    - ステルススキャンにできる
+  - NULLスキャン
+    - TCPのフラグを全てNULLにして送信
+    - ステルススキャンにできる
+  - 対策
+    - 必要ないポートを閉じる
+
+```
+# nmapの場合
+# 上記に挙げたTCPのスキャン各種に対応するモードがある様子
+# https://ja.wikipedia.org/wiki/Nmap
+# helpで調べると以下オプションが出てくる
+SCAN TECHNIQUES:
+  -sS/sT/sA/sW/sM: TCP SYN/Connect()/ACK/Window/Maimon scans
+  -sU: UDP Scan
+  -sN/sF/sX: TCP Null, FIN, and Xmas scans
+  --scanflags <flags>: Customize TCP scan flags
+  -sI <zombie host[:probeport]>: Idle scan
+  -sY/sZ: SCTP INIT/COOKIE-ECHO scans
+  -sO: IP protocol scan
+  -b <FTP relay host>: FTP bounce scan
+# 例えば finスキャンをする場合
+sudo nmap -sF 127.0.0.1
+# nullスキャン
+sudo nmap -sn 127.0.0.1
+```
